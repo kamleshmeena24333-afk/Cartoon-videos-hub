@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cartoon Video Maker</title>
+  <style>
+    body { font-family: sans-serif; padding: 15px; margin: 0; background: #f4f4f9; }
+    canvas { width: 100%; max-width: 400px; display: block; margin: 0 auto; border-radius: 10px; border: 2px solid #333; }
+    .controls { max-width: 400px; margin: 15px auto; display: flex; flex-direction: column; gap: 10px; }
+    input, select, textarea, button { padding: 10px; font-size: 15px; border-radius: 6px; border: 1px solid #ccc; }
+    button { background: #27ae60; color: white; border: none; font-weight: bold; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <canvas id="cartoonCanvas" width="400" height="400"></canvas>
+
+  <div class="controls">
+    <label>कपड़ों का रंग: <input type="color" id="shirtColor" value="#e74c3c"></label>
+    <label>बालों का रंग: <input type="color" id="hairColor" value="#2c3e50"></label>
+    <label>बैकग्राउंड: 
+      <select id="bgSelect">
+        <option value="#78AB46">गाँव (Green)</option>
+        <option value="#5DADE2">शहर (Blue)</option>
+      </select>
+    </label>
+    <textarea id="scriptText" rows="3">नमस्ते, यह मेरा मोबाइल कार्टून प्रोजेक्ट है।</textarea>
+    <button onclick="playCartoon()">▶️ प्ले करें और बुलवाएं</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('cartoonCanvas');
+    const ctx = canvas.getContext('2d');
+    let mouth = 'closed';
+
+    function draw() {
+      const shirt = document.getElementById('shirtColor').value;
+      const hair = document.getElementById('hairColor').value;
+      const bg = document.getElementById('bgSelect').value;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Background & Ground
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 400, 400);
+      ctx.fillStyle = '#4A235A';
+      ctx.fillRect(0, 300, 400, 100);
+
+      // Body (Shirt)
+      ctx.fillStyle = shirt;
+      ctx.fillRect(170, 220, 60, 90);
+
+      // Face
+      ctx.beginPath();
+      ctx.arc(200, 150, 45, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFDCB1';
+      ctx.fill();
+      ctx.stroke();
+
+      // Hair
+      ctx.fillStyle = hair;
+      ctx.beginPath();
+      ctx.arc(200, 135, 47, Math.PI, 0, false);
+      ctx.fill();
+
+      // Eyes
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(185, 145, 4, 0, Math.PI * 2);
+      ctx.arc(215, 145, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mouth
+      ctx.fillStyle = '#900C3F';
+      ctx.beginPath();
+      if (mouth === 'open') {
+        ctx.ellipse(200, 172, 10, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.rect(192, 170, 16, 3);
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    function playCartoon() {
+      const text = document.getElementById('scriptText').value;
+      if (!('speechSynthesis' in window)) return alert('Voice not supported');
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'hi-IN';
+
+      utterance.onboundary = function(e) {
+        if (e.name === 'word') {
+          mouth = 'open';
+          setTimeout(() => { mouth = 'closed'; }, 180);
+        }
+      };
+
+      utterance.onend = function() { mouth = 'closed'; };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
+
